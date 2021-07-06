@@ -24,7 +24,14 @@ optional arguments:
 
 ## Example
 ```
-gpsadd2exif.py --verbose=2  --delta=-9 yamap_2021-06-28_13_30.gpx  FJIMG_20210628_153749.jpg
+gpsadd2exif.py --verbose=2 --delta=-9 yamap_2021-06-28_13_30.gpx  FJIMG_20210628_153749.jpg
 
 gpsadd2exif.py --delta=-9 yamap_2021-06-28_13_30.gpx  *
+
+# using system timezone
+gpsadd2exif.py yamap_2021-06-28_13_30.gpx  *
 ```
+
+## Development Environment
+* macOS
+* Python 3.9.0
