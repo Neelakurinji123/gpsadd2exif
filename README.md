@@ -17,3 +17,10 @@ optional arguments:
   -D DELTA, --delta DELTA
                         time offset (unit: hour)
 ```
+
+##Examples
+```
+gpsadd2exif.py --verbose=2  --delta=-9 yamap_2021-06-28_13_30.gpx  FJIMG_20210628_153749.jpg
+
+gpsadd2exif.py --delta=-9 yamap_2021-06-28_13_30.gpx  *
+```
