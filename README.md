@@ -15,5 +15,5 @@ optional arguments:
                         verbose mode: 0, 1 or 2
   -S, --simulation      simulation mode
   -D DELTA, --delta DELTA
-                        time offset (unit: hour): hour)
+                        time offset (unit: hour): hour
 ```
