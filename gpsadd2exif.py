@@ -103,13 +103,14 @@ def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
             v = gpx_index[p]
             try:
                 photo = gpsphoto.GPSPhoto(fname)
+                utc_time = datetime.utcfromtimestamp(gpx_data[p][0]).strftime('%Y:%m:%d %H:%M:%S')
 #                localtime = datetime.utcfromtimestamp(gpx_data[p][0] - system_tz_offset).strftime('%Y:%m:%d %H:%M:%S')
 #                info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=alt, timestamp=localtime)
                 info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=gpx_data[p][3])
                 if opt.simulation == False:
                     photo.modGPSData(info, fname)
                 print('{0:<32}: success!'.format(fname)) if opt.verbose == 1 else None
-                print('{0:<32}: success! => {1}'.format(fname, gpx_data[p])) if opt.verbose == 2 else None
+                print('{0:<32}: success! => {1} {2}'.format(fname, utc_time, gpx_data[p][1:])) if opt.verbose == 2 else None
 
             except:
                 print('{0:<32}: failed.'.format(fname)) if opt.verbose == 1 or opt.verbose == 2 else None
