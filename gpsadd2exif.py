@@ -64,7 +64,7 @@ def prepare():
         for segment in track.segments:
             for point in segment.points:
                 gpx_data.append([int(point.time.replace(tzinfo=timezone.utc).timestamp()),
-                    point.latitude, point.longitude, point.elevation])
+                    round(point.latitude,5), round(point.longitude,5), int(point.elevation)])
 
     gpx_index = list()
     gpx_index = [n[0] for n in gpx_data]
@@ -103,10 +103,9 @@ def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
             v = gpx_index[p]
             try:
                 photo = gpsphoto.GPSPhoto(fname)
-                alt = int(gpx_data[p][3])
 #                localtime = datetime.utcfromtimestamp(gpx_data[p][0] - system_tz_offset).strftime('%Y:%m:%d %H:%M:%S')
 #                info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=alt, timestamp=localtime)
-                info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=alt)
+                info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=gpx_data[p][3])
                 if opt.simulation == False:
                     photo.modGPSData(info, fname)
                 print('{0:<32}: success!'.format(fname)) if opt.verbose == 1 else None
