@@ -26,12 +26,12 @@ simulation_mode = False
 offset = None  # from OS
 
 def prepare():
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('-V', '--verbose', default=1, type=int, help='verbose mode: 0 or 1')
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-V', '--verbose', default=1, type=int, help='verbose mode: 0, 1 or 2')
     parser.add_argument('-S', '--simulation', action='store_true', help='simulation mode')
     parser.add_argument('-D', '--delta',help='time offset (unit: hour)')
-    parser.add_argument('gpx_file', help='gpx file')
-    parser.add_argument('jpeg_files', nargs='*', help='jpag image(s)')
+    parser.add_argument('gpx_file', help='a gpx file')
+    parser.add_argument('jpeg_files', nargs='*', help='jpag file(s)')
     opt = parser.parse_args()
 
     filelist = list()
