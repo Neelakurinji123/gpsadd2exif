@@ -91,7 +91,7 @@ def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
         else:
             exifgps = "n/a"
 
-        dt = datetime.strptime(exif['DateTime'], img_datetime_fmt)
+        dt = datetime.strptime(exif['DateTimeOriginal'], img_datetime_fmt)
         utc_time = dt.replace(tzinfo=timezone.utc)
         img_timestamp = int(utc_time.timestamp() + system_tz_offset)
         a = gpx_index.copy()
