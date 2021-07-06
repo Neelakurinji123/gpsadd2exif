@@ -18,7 +18,7 @@ optional arguments:
                         time offset (unit: hour)
 ```
 
-##Examples
+## Examples
 ```
 gpsadd2exif.py --verbose=2  --delta=-9 yamap_2021-06-28_13_30.gpx  FJIMG_20210628_153749.jpg
 
