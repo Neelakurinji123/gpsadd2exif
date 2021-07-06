@@ -1,6 +1,10 @@
 # gpsadd2exif
 A tiny tool for adding GPS info to jpeg image tag (EXIF) using GPX data.
 
+## Prerequisites
+```
+pip3 install gpxpy gpsphoto ExifRead Pillow
+```
 ## Usage
 ```
 usage: gpsadd2exif.py [-h] [-V VERBOSE] [-S] [-D DELTA] gpx_file [jpeg_files ...]
