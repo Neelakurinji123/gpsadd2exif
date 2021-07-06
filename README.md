@@ -5,10 +5,8 @@ A tiny tool for adding GPS info to jpeg image tag (EXIF) using GPX data.
 ```
 usage: gpsadd2exif.py [-h] [-V VERBOSE] [-S] [-D DELTA] gpx_file [jpeg_files ...]
 
-Process some integers.
-
 positional arguments:
-  gpx_file              gpx file
+  gpx_file              a gpx file
   jpeg_files            jpag file(s)
 
 optional arguments:
@@ -17,5 +15,5 @@ optional arguments:
                         verbose mode: 0, 1 or 2
   -S, --simulation      simulation mode
   -D DELTA, --delta DELTA
-                        time offset (unit: hour)
+                        time offset (unit: hour): hour)
 ```
