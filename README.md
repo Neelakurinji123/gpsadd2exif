@@ -1,5 +1,5 @@
 # gpsadd2exif
-A tiny tool for adding GPS info to jpeg image tag (EXIF) using GPX data.
+A tiny tool for adding GPS info to jpeg image tag (EXIF) with a GPX data.
 
 ## Prerequisites
 ```
