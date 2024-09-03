@@ -3,7 +3,7 @@
 # A tiny tool for adding GPS info to jpeg images using GPX data.
 #
 # Created by Krishna
-# krishna@hottuna.tk
+# krishna@hottunalabs.net
 #
 
 import os, sys, re, argparse
@@ -29,18 +29,21 @@ def prepare():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-V', '--verbose', default=1, type=int, help='verbose mode: 0, 1 or 2')
     parser.add_argument('-S', '--simulation', action='store_true', help='simulation mode')
-    parser.add_argument('-D', '--delta',help='time offset (unit: hour)')
+    parser.add_argument('-I', '--info', action='store_true', help='gpx info')
+    parser.add_argument('-D', '--delta', help='time offset (unit: hour)')
+    parser.add_argument('-T', '--template', type=str, help='generate leaflet shortcode')
     parser.add_argument('gpx_file', help='a gpx file')
     parser.add_argument('jpeg_files', nargs='*', help='jpag file(s)')
     opt = parser.parse_args()
 
     filelist = list()
     for n in opt.jpeg_files:
-        match = re.search('\.jpg$|\.jpeg$|\.JPG$|\.JPEG$',n)
+        #match = re.search('.jpg$|.jpeg$|.JPG$|.JPEG$|.avif$',n)
+        match = re.search('.jpg$|.jpeg$|.JPG$|.JPEG$',n)
         if match:
             filelist.append(n)
 
-    if len(filelist) == 0:
+    if len(filelist) == 0 and opt.info == False:
         print('Error: No valid images')
         exit(1)
 
@@ -64,13 +67,28 @@ def prepare():
         for segment in track.segments:
             for point in segment.points:
                 gpx_data.append([int(point.time.replace(tzinfo=timezone.utc).timestamp()),
-                    round(point.latitude,5), round(point.longitude,5), int(point.elevation)])
+                    round(point.latitude,7), round(point.longitude,7), int(point.elevation)])
 
     gpx_index = list()
     gpx_index = [n[0] for n in gpx_data]
 
     return opt, system_tz_offset, gpx_data, gpx_index, filelist
 
+def info(gpx_data):
+    ti = [x[0] for x in gpx_data]
+    lat = [x[1] for x in gpx_data]
+    lon = [x[2] for x in gpx_data]
+    ele = [x[3] for x in gpx_data]
+    print("\n == [GPX info] ==\n")
+    print(f' Min Coordinate          : [ {min(lat)}, {min(lon)} ]')
+    print(f' Max Coordinate          : [ {max(lat)}, {max(lon)} ]')
+    latCenter = (min(lat) + max(lat)) * 0.5
+    lonCenter = (min(lon) + max(lon)) * 0.5
+    print(f' Center Coordinate       : [ {latCenter}, {lonCenter} ]')
+    print(f' Start Coordinate        : [ {lat[0]}, {lon[0]} ]')
+    print(f' End Coordinate          : [ {lat[-1]}, {lon[-1]} ]')
+    print(f' Start and End time      : [ {min(ti)}, {max(ti)} ]')
+    print(f' Min and Max elevation   : [ {min(ele)}, {max(ele)} ]')
 
 def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
     img = Image.open(fname)
@@ -103,27 +121,40 @@ def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
             v = gpx_index[p]
             try:
                 photo = gpsphoto.GPSPhoto(fname)
-                utc_time = datetime.utcfromtimestamp(gpx_data[p][0]).strftime('%Y:%m:%d %H:%M:%S')
+                #utc_time = datetime.utcfromtimestamp(gpx_data[p][0]).strftime('%Y:%m:%d %H:%M:%S')
+                utc_time = datetime.fromtimestamp(gpx_data[p][0], timezone.utc).strftime('%Y:%m:%d %H:%M:%S')
 #                localtime = datetime.utcfromtimestamp(gpx_data[p][0] - system_tz_offset).strftime('%Y:%m:%d %H:%M:%S')
 #                info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=alt, timestamp=localtime)
                 info = gpsphoto.GPSInfo((gpx_data[p][1], gpx_data[p][2]), alt=gpx_data[p][3])
-                if opt.simulation == False:
+                if opt.simulation == True:
+                    #print('{0:<32}: success!'.format(fname)) if opt.verbose == 1 else None
+                    print(f'{fname:<32} <DATE> {utc_time}, <LOCATION> {gpx_data[p][1:]}')
+                elif opt.template != None:
+                        temp = opt.template
+                        lat, lng, ele = gpx_data[p][1:]
+                        with open(temp, 'r') as f:
+                            s = f.read()
+                            print(eval(s))
+                else:
                     photo.modGPSData(info, fname)
-                print('{0:<32}: success!'.format(fname)) if opt.verbose == 1 else None
-                print('{0:<32}: success! => {1} {2}'.format(fname, utc_time, gpx_data[p][1:])) if opt.verbose == 2 else None
+                    print(f'{fname:<32}: success!') if opt.verbose == 1 else None
+                    print(f'{fname:<32}: success! => {utc_time} {gpx_data[p][1:]}') if opt.verbose == 2 else None
 
             except:
-                print('{0:<32}: failed.'.format(fname)) if opt.verbose == 1 or opt.verbose == 2 else None
+                print(f'{fname:<32}: failed.'.format()) if opt.verbose == 1 or opt.verbose == 2 else None
         elif (max(a) > 0 and min(a) > 0 ) or (max(a) < 0 and min(a) < 0):
-            print('{0:<32}: out of range'.format(fname)) if opt.verbose == 1 or opt.verbose == 2 else None
+            print(f'{fname:<32}: out of range') if opt.verbose == 1 or opt.verbose == 2 else None
         else:
-            print('{0:<32}: unkown error'.format(fname)) if opt.verbose == 1 or opt.verbose == 2 else None
+            print(f'{fname:<32}: unkown error') if opt.verbose == 1 or opt.verbose == 2 else None
 
 
 if __name__ == "__main__":
     opt, system_tz_offset, gpx_data, gpx_index, filelist = prepare()
     if opt.simulation == True:
-        print('== [Simulation mode] ==')
+        print("\n == [Simulation mode] ==\n")
+    elif opt.info == True:
+        info(gpx_data)
+        #print('test2', gpx_data)
     for filename in filelist:
         main(opt, system_tz_offset, gpx_data, gpx_index, filename)
 
