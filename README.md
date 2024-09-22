@@ -22,7 +22,9 @@ optional arguments:
                         time offset (unit: hour)
   -I, --info            gpx info
   -G, --geojson         convert from GPX to Giojson 
+  -T, --template TEMP   generate leaflet shortcode
   
+    
 ```
 
 ## Example
