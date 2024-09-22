@@ -7,6 +7,8 @@
 #
 
 import os, sys, re, argparse
+import time as t
+from pathlib import Path
 from PIL import Image
 #import PIL.ExifTags as ExifTags
 #import xml.etree.ElementTree as ET
@@ -14,9 +16,11 @@ from PIL.ExifTags import TAGS, GPSTAGS
 import xml.dom.minidom as dom
 import gpxpy
 import gpxpy.gpx
-import time as t
 from datetime import datetime, timezone, timedelta
 from GPSPhoto import gpsphoto
+#from geojson import Feature, MultiLineString, FeatureCollection
+import geojson
+
 #import exifread
 #from dateutil.parser import parse  #pip3 install python-dateutil
 
@@ -32,6 +36,7 @@ def prepare():
     parser.add_argument('-I', '--info', action='store_true', help='gpx info')
     parser.add_argument('-D', '--delta', help='time offset (unit: hour)')
     parser.add_argument('-T', '--template', type=str, help='generate leaflet shortcode')
+    parser.add_argument('-G', '--geojson', action='store_true', help='convert from GPX to Giojson')
     parser.add_argument('gpx_file', help='a gpx file')
     parser.add_argument('jpeg_files', nargs='*', help='jpag file(s)')
     opt = parser.parse_args()
@@ -43,9 +48,10 @@ def prepare():
         if match:
             filelist.append(n)
 
-    if len(filelist) == 0 and opt.info == False:
-        print('Error: No valid images')
-        exit(1)
+    if opt.info == False and opt.geojson == False:
+        if len(filelist) == 0:
+            print('Error: No valid images')
+            exit(1)
 
     # sanity check
     try:
@@ -63,16 +69,19 @@ def prepare():
     d = open(opt.gpx_file, 'r')
     gpx = gpxpy.parse(d)
     gpx_data = list()
+    gpx_name = gpx.tracks[0].name
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
-                gpx_data.append([int(point.time.replace(tzinfo=timezone.utc).timestamp()),
-                    round(point.latitude,7), round(point.longitude,7), int(point.elevation)])
+                p_time = int(point.time.replace(tzinfo=timezone.utc).timestamp()) if not point.time is None else -1
+                p_ele = int(point.elevation) if not point.elevation is None else -1
+                gpx_data.append([p_time,
+                    round(point.latitude,7), round(point.longitude,7), p_ele])
 
     gpx_index = list()
     gpx_index = [n[0] for n in gpx_data]
 
-    return opt, system_tz_offset, gpx_data, gpx_index, filelist
+    return opt, system_tz_offset, gpx_data, gpx_index, gpx_name, filelist
 
 def info(gpx_data):
     ti = [x[0] for x in gpx_data]
@@ -89,6 +98,22 @@ def info(gpx_data):
     print(f' End Coordinate          : [ {lat[-1]}, {lon[-1]} ]')
     print(f' Start and End time      : [ {min(ti)}, {max(ti)} ]')
     print(f' Min and Max elevation   : [ {min(ele)}, {max(ele)} ]')
+
+def conv_geojson(gpx_data, gpx_name, gpx_file):
+    x = lambda a: [a[2], a[1], a[3]]
+    gpx_data = [ x(n) for n in gpx_data ]
+    geo_mline = geojson.MultiLineString([tuple(gpx_data)])
+    geo_feature = geojson.Feature(geometry=geo_mline)
+    geo_feature["properties"]["name"] = gpx_name
+    geo_data = geojson.FeatureCollection([geo_feature])
+    
+    fname = Path(gpx_file)
+    fname = str(fname.with_suffix('')) + '.geojson'
+    dump = geojson.dumps(geo_data, sort_keys=True)
+    with open(fname, "w") as f:
+        f.write(dump)
+    
+    
 
 def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
     img = Image.open(fname)
@@ -149,12 +174,14 @@ def main(opt, system_tz_offset, gpx_data, gpx_index, fname):
 
 
 if __name__ == "__main__":
-    opt, system_tz_offset, gpx_data, gpx_index, filelist = prepare()
+    opt, system_tz_offset, gpx_data, gpx_index, gpx_name, filelist = prepare()
     if opt.simulation == True:
         print("\n == [Simulation mode] ==\n")
     elif opt.info == True:
         info(gpx_data)
-        #print('test2', gpx_data)
+    elif opt.geojson == True:
+        conv_geojson(gpx_data, gpx_name, opt.gpx_file)
+        
     for filename in filelist:
         main(opt, system_tz_offset, gpx_data, gpx_index, filename)
 

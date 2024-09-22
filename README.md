@@ -7,7 +7,7 @@ pip3 install gpxpy gpsphoto ExifRead Pillow
 ```
 ## Usage
 ```
-usage: gpsadd2exif.py [-h] [-V VERBOSE] [-S] [-D DELTA] gpx_file [jpeg_files ...]
+usage: gpsadd2exif.py [-h] [-V VERBOSE] [-S] [-I] [-D DELTA] [-T TEMPLATE] [-G] gpx_file [jpeg_files ...]
 
 positional arguments:
   gpx_file              a gpx file
@@ -20,6 +20,9 @@ optional arguments:
   -S, --simulation      simulation mode
   -D DELTA, --delta DELTA
                         time offset (unit: hour)
+  -I, --info            gpx info
+  -G, --geojson         convert from GPX to Giojson 
+  
 ```
 
 ## Example
